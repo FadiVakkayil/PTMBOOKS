@@ -8,7 +8,6 @@ import TextbookCard from './TextbookCard';
 import { generateReport } from '@/utils/reportGenerator';
 import RecentActivity from './RecentActivity';
 import { toast } from 'sonner';
-import { RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 
 interface Book {
   id: string;
@@ -41,10 +40,28 @@ export default function Dashboard() {
         .eq('medium', selectedMedium);
 
       if (fetchError) {
-        console.error('Error fetching books:', fetchError.message, fetchError.details, fetchError.hint);
         setError(`${fetchError.message}. ${fetchError.hint || ''}`);
-      } else {
-        // Custom Category Sorting
+      } else if (data) {
+        // --- DEDUPLICATION LOGIC ---
+        // Group by subject_name to prevent duplicates in the UI
+        const deduplicated = (data as Book[]).reduce((acc, current) => {
+          const key = current.subject_name;
+          if (!acc[key]) {
+            acc[key] = { ...current };
+          } else {
+            // Merge counts
+            acc[key].stock_total += current.stock_total;
+            acc[key].stock_sold += current.stock_sold;
+            // Use the latest price/cost (the one with the "larger" ID or later)
+            if (current.id > acc[key].id) {
+              acc[key].price = current.price;
+              acc[key].cost_price = current.cost_price;
+              acc[key].id = current.id;
+            }
+          }
+          return acc;
+        }, {} as Record<string, Book>);
+
         const subjectPriority: Record<string, number> = {
           'Biology': 1, 'Chemistry': 1, 'Physics': 1, 'Information Technology (IT)': 1,
           'Social Science 1': 2, 'Social Science 2': 2,
@@ -52,10 +69,9 @@ export default function Dashboard() {
           'Urdu': 4, 'Malayalam 1': 4, 'Sanskrit': 4, 'Arabic': 4, 'Malayalam 2': 4
         };
 
-        const sortedData = (data || []).sort((a, b) => {
+        const sortedData = Object.values(deduplicated).sort((a, b) => {
           const pA = subjectPriority[a.subject_name] || 99;
           const pB = subjectPriority[b.subject_name] || 99;
-          
           if (pA !== pB) return pA - pB;
           return a.subject_name.localeCompare(b.subject_name);
         });
@@ -63,7 +79,7 @@ export default function Dashboard() {
         setBooks(sortedData);
       }
     } catch (err: any) {
-      setError('Failed to connect to Supabase. Check your connection or API keys.');
+      setError('Failed to connect to Supabase.');
     } finally {
       setLoading(false);
     }
@@ -178,11 +194,11 @@ export default function Dashboard() {
                 </button>
               </div>
             </div>
-            <h2 className="text-4xl font-bold font-outfit text-center flex-1">Textbook Inventory System</h2>
+            <h2 className="text-4xl font-bold font-outfit text-center flex-1 text-primary">Textbook Inventory</h2>
             <div className="w-full md:w-auto flex justify-center md:justify-end flex-1 gap-3">
               <button 
                 onClick={() => setIsHistoryOpen(true)}
-                className="flex items-center gap-2 px-6 py-3 bg-secondary text-primary rounded-xl font-bold hover:bg-primary hover:text-white transition-all shadow-lg shadow-primary/5 active:scale-95"
+                className="flex items-center gap-2 px-6 py-3 bg-white text-primary rounded-xl font-bold hover:bg-primary hover:text-white border border-primary/20 transition-all shadow-sm active:scale-95"
               >
                 <Clock size={20} />
                 <span className="hidden sm:inline">History</span>
@@ -190,7 +206,7 @@ export default function Dashboard() {
               <button 
                 onClick={handleGenerateReport}
                 disabled={reportLoading}
-                className="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-2.5 bg-white border border-primary/20 text-primary rounded-xl font-bold hover:bg-primary hover:text-white transition-all shadow-sm disabled:opacity-50"
+                className="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-bold hover:bg-accent transition-all shadow-lg shadow-primary/20 disabled:opacity-50"
               >
                 {reportLoading ? <Loader2 size={18} className="animate-spin" /> : <FileText size={18} />}
                 Generate Report
