@@ -5,7 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 
 interface AuthContextType {
   user: string | null;
-  login: (username: string) => void;
+  login: () => void;
   logout: () => void;
   isAuthenticated: boolean;
 }
@@ -26,9 +26,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLoading(false);
   }, []);
 
-  const login = (username: string) => {
-    localStorage.setItem('ptm_user', username);
-    setUser(username);
+  const login = () => {
+    localStorage.setItem('ptm_user', 'Staff');
+    setUser('Staff');
     router.push('/');
   };
 

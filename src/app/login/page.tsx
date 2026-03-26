@@ -5,16 +5,9 @@ import { motion } from 'framer-motion';
 import { useAuth } from '@/components/AuthContext';
 import { BookOpen, User, Lock, Loader2, AlertCircle } from 'lucide-react';
 
-const users = [
-  { username: 'Sudha MV HM', password: 'ptmsudha' },
-  { username: 'Rajesh IT', password: 'ptmrajesh' },
-  { username: 'Ashraf Cheif', password: 'ptmashraf' },
-  { username: 'Sathi AHM', password: 'ptmsathi' },
-  { username: 'Geetha MT', password: 'ptmgeetha' },
-];
+const SHARED_PASSWORD = 'ptm@books#2026';
 
 export default function LoginPage() {
-  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -25,13 +18,11 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
 
-    const validUser = users.find(u => u.username === username && u.password === password);
-
     setTimeout(() => {
-      if (validUser) {
-        login(username);
+      if (password === SHARED_PASSWORD) {
+        login();
       } else {
-        setError('Invalid username or password. Please check your credentials.');
+        setError('Incorrect security password. Please try again.');
         setLoading(false);
       }
     }, 800);
@@ -50,49 +41,33 @@ export default function LoginPage() {
         className="w-full max-w-md relative z-10"
       >
         <div className="bg-white rounded-3xl p-8 shadow-2xl border border-primary/5">
-          <div className="flex flex-col items-center mb-8">
+          <div className="flex flex-col items-center mb-10">
             <motion.div
               initial={{ rotate: -10 }}
               animate={{ rotate: 0 }}
-              className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center text-white mb-4 shadow-xl shadow-primary/20"
+              className="w-20 h-20 bg-primary rounded-2xl flex items-center justify-center text-white mb-6 shadow-xl shadow-primary/20"
             >
-              <BookOpen size={32} />
+              <Lock size={40} />
             </motion.div>
-            <h1 className="text-3xl font-black font-outfit text-foreground tracking-tight">PTM HSS</h1>
-            <p className="text-[10px] font-bold text-foreground/40 uppercase tracking-[0.2em]">Textbook Portal Login</p>
+            <h1 className="text-3xl font-black font-outfit text-foreground tracking-tight mb-2">PTM HSS Dashboard</h1>
+            <p className="text-[10px] font-bold text-foreground/40 uppercase tracking-[0.2em]">Secure Staff Access Only</p>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-6">
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-foreground/40 uppercase tracking-widest ml-1">Username</label>
-              <div className="relative group">
+          <form onSubmit={handleLogin} className="space-y-8">
+            <div className="space-y-3 text-center">
+              <label className="text-xs font-bold text-foreground/40 uppercase tracking-widest block">Enter Portal Password</label>
+              <div className="relative group max-w-xs mx-auto">
                 <div className="absolute left-4 top-1/2 -translate-y-1/2 text-foreground/30 group-focus-within:text-primary transition-colors">
-                  <User size={20} />
-                </div>
-                <input
-                  type="text"
-                  required
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Enter Username"
-                  className="w-full pl-12 pr-4 py-4 bg-secondary/50 rounded-2xl border border-primary/5 focus:border-primary/30 focus:outline-none focus:ring-4 focus:ring-primary/5 transition-all font-medium"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-foreground/40 uppercase tracking-widest ml-1">Password</label>
-              <div className="relative group">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-foreground/30 group-focus-within:text-gold transition-colors">
                   <Lock size={20} />
                 </div>
                 <input
                   type="password"
                   required
+                  autoFocus
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-12 pr-4 py-4 bg-secondary/50 rounded-2xl border border-primary/5 focus:border-gold/30 focus:outline-none focus:ring-4 focus:ring-gold/5 transition-all font-medium"
+                  className="w-full pl-12 pr-4 py-4 bg-secondary/50 rounded-2xl border border-primary/5 focus:border-primary/30 focus:outline-none focus:ring-4 focus:ring-primary/5 transition-all font-medium text-center tracking-widest text-lg"
                 />
               </div>
             </div>
@@ -115,17 +90,17 @@ export default function LoginPage() {
               {loading ? (
                 <>
                   <Loader2 className="animate-spin" size={24} />
-                  Verifying...
+                  Accessing...
                 </>
               ) : (
-                'Login to Portal'
+                'Unlock Portal'
               )}
             </button>
           </form>
 
-          <div className="mt-8 text-center pt-8 border-t border-gray-100">
+          <div className="mt-10 text-center pt-8 border-t border-gray-100">
             <p className="text-[10px] font-bold text-foreground/20 uppercase tracking-widest">
-              OFFICIAL SYSTEM FOR STAFF ONLY
+              AUTHORIZED SCHOOL PERSONNEL ONLY
             </p>
           </div>
         </div>
