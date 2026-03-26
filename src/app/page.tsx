@@ -25,15 +25,11 @@ export default function Home() {
         animate={{ opacity: isLoading ? 0 : 1 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
       >
-        {!isLoading && (
-          <>
-            <Navbar />
-            <Hero />
-            <Dashboard />
-            <Features />
-            <Footer />
-          </>
-        )}
+        <Navbar />
+        <Hero />
+        <Dashboard />
+        <Features />
+        <Footer />
       </motion.div>
     </main>
   );

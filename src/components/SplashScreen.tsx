@@ -10,7 +10,7 @@ export default function SplashScreen({ finishLoading }: { finishLoading: () => v
     setIsMounted(true);
     const timeout = setTimeout(() => {
       finishLoading();
-    }, 3000); // 2.5s display + 0.5s buffer
+    }, 1800); // Faster loading for better UX
 
     return () => clearTimeout(timeout);
   }, [finishLoading]);
