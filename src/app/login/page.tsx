@@ -3,12 +3,13 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/components/AuthContext';
-import { BookOpen, User, Lock, Loader2, AlertCircle } from 'lucide-react';
+import { BookOpen, User, Lock, Loader2, AlertCircle, Eye, EyeOff } from 'lucide-react';
 
 const SHARED_PASSWORD = 'ptm@books#2026';
 
 export default function LoginPage() {
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
@@ -49,8 +50,8 @@ export default function LoginPage() {
             >
               <Lock size={40} />
             </motion.div>
-            <h1 className="text-3xl font-black font-outfit text-foreground tracking-tight mb-2">PTM HSS Dashboard</h1>
-            <p className="text-[10px] font-bold text-foreground/40 uppercase tracking-[0.2em]">Secure Staff Access Only</p>
+            <h1 className="text-3xl font-black font-outfit text-foreground tracking-tight mb-2 text-center">PTM HSS Dashboard</h1>
+            <p className="text-[10px] font-bold text-foreground/40 uppercase tracking-[0.2em] text-center">Secure Staff Access Only</p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-8">
@@ -61,14 +62,22 @@ export default function LoginPage() {
                   <Lock size={20} />
                 </div>
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   required
                   autoFocus
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-12 pr-4 py-4 bg-secondary/50 rounded-2xl border border-primary/5 focus:border-primary/30 focus:outline-none focus:ring-4 focus:ring-primary/5 transition-all font-medium text-center tracking-widest text-lg"
+                  className="w-full pl-12 pr-12 py-4 bg-secondary/50 rounded-2xl border border-primary/5 focus:border-primary/30 focus:outline-none focus:ring-4 focus:ring-primary/5 transition-all font-medium text-center tracking-widest text-lg"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-foreground/30 hover:text-primary transition-colors focus:outline-none"
+                  title={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
               </div>
             </div>
 
