@@ -9,7 +9,7 @@ interface SaleItem {
   subtotal: number;
 }
 
-export const generateReceipt = (
+const getReceiptDoc = (
   studentName: string,
   division: string,
   items: SaleItem[],
@@ -77,6 +77,32 @@ export const generateReceipt = (
   doc.text('Thank you for your cooperation.', 74, finalY, { align: 'center' });
   doc.text('Computer Generated Receipt - No Signature Required', 74, finalY + 5, { align: 'center' });
 
+  return doc;
+};
+
+export const generateReceipt = (
+  studentName: string,
+  division: string,
+  items: SaleItem[],
+  totalAmount: number,
+  staffName: string,
+  phone?: string,
+  schoolName?: string
+) => {
+  const doc = getReceiptDoc(studentName, division, items, totalAmount, staffName, phone, schoolName);
   const fileName = `Bill_${studentName.replace(/\s+/g, '_')}_${new Date().getTime()}.pdf`;
   doc.save(fileName);
+};
+
+export const getReceiptBlobUrl = (
+  studentName: string,
+  division: string,
+  items: SaleItem[],
+  totalAmount: number,
+  staffName: string,
+  phone?: string,
+  schoolName?: string
+) => {
+  const doc = getReceiptDoc(studentName, division, items, totalAmount, staffName, phone, schoolName);
+  return URL.createObjectURL(doc.output('blob'));
 };
