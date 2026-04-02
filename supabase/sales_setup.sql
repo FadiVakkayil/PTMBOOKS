@@ -3,6 +3,8 @@ CREATE TABLE IF NOT EXISTS public.sales (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     student_name TEXT NOT NULL,
     division TEXT NOT NULL,
+    customer_phone TEXT,
+    customer_school TEXT,
     total_amount DECIMAL(10, 2) NOT NULL,
     items JSONB NOT NULL, -- [{book_id, subject_name, quantity, price, subtotal}]
     staff_name TEXT DEFAULT 'Staff',
@@ -17,6 +19,8 @@ CREATE POLICY "Allow public all access" ON public.sales FOR ALL USING (true) WIT
 CREATE OR REPLACE FUNCTION record_bulk_sale(
     p_student_name TEXT,
     p_division TEXT,
+    p_phone TEXT,
+    p_school TEXT,
     p_items JSONB,
     p_total_amount DECIMAL,
     p_staff_name TEXT
@@ -25,8 +29,8 @@ DECLARE
     item JSONB;
 BEGIN
     -- 1. Insert the master sale record
-    INSERT INTO public.sales (student_name, division, total_amount, items, staff_name)
-    VALUES (p_student_name, p_division, p_total_amount, p_items, p_staff_name);
+    INSERT INTO public.sales (student_name, division, customer_phone, customer_school, total_amount, items, staff_name)
+    VALUES (p_student_name, p_division, p_phone, p_school, p_total_amount, p_items, p_staff_name);
 
     -- 2. Loop through items and update book stock
     FOR item IN SELECT * FROM jsonb_array_elements(p_items)

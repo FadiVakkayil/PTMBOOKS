@@ -14,7 +14,9 @@ export const generateReceipt = (
   division: string,
   items: SaleItem[],
   totalAmount: number,
-  staffName: string
+  staffName: string,
+  phone?: string,
+  schoolName?: string
 ) => {
   const doc = new jsPDF('p', 'mm', [148, 210]); // A5 Size Portrait
   const date = new Date().toLocaleString();
@@ -37,6 +39,8 @@ export const generateReceipt = (
   doc.setFont('helvetica', 'bold');
   doc.text(`Student: ${studentName}`, 14, 42);
   doc.text(`Division: ${division}`, 14, 48);
+  if (phone) doc.text(`Phone: ${phone}`, 14, 54);
+  if (schoolName) doc.text(`School: ${schoolName}`, 14, 60);
   
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
@@ -52,7 +56,7 @@ export const generateReceipt = (
   ]);
 
   autoTable(doc, {
-    startY: 55,
+    startY: schoolName ? 65 : (phone ? 60 : 55),
     head: [['Subject', 'Qty', 'Price', 'Subtotal']],
     body: tableData,
     foot: [['', '', 'TOTAL AMOUNT', `Rs. ${totalAmount.toFixed(1)}`]],

@@ -5,6 +5,8 @@ interface Sale {
   id: string;
   student_name: string;
   division: string;
+  customer_phone?: string;
+  customer_school?: string;
   total_amount: number;
   items: any[];
   staff_name: string;
@@ -39,6 +41,8 @@ export const generateSalesLedger = (sales: Sale[]) => {
       new Date(sale.created_at).toLocaleString(),
       sale.student_name,
       sale.division,
+      sale.customer_phone || '-',
+      sale.customer_school || '-',
       itemsList,
       `Rs. ${Number(sale.total_amount).toFixed(2)}`,
       sale.staff_name || 'Staff'
@@ -47,19 +51,21 @@ export const generateSalesLedger = (sales: Sale[]) => {
 
   autoTable(doc, {
     startY: 40,
-    head: [['Date/Time', 'Student', 'Div', 'Items Distributed', 'Total Amount', 'Issued By']],
+    head: [['Date/Time', 'Student', 'Div', 'Phone', 'School', 'Items Distributed', 'Total Amount', 'Issued By']],
     body: tableData,
-    foot: [['', '', '', 'GRAND TOTAL REVENUE', `Rs. ${totalSalesValue.toFixed(2)}`, '']],
+    foot: [['', '', '', '', '', 'GRAND TOTAL REVENUE', `Rs. ${totalSalesValue.toFixed(2)}`, '']],
     theme: 'striped',
     headStyles: { fillColor: [37, 99, 235], halign: 'center', fontSize: 10 },
     footStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold', halign: 'center', fontSize: 10 },
     styles: { fontSize: 9, cellPadding: 3, halign: 'center', overflow: 'linebreak' },
     columnStyles: {
-      0: { cellWidth: 40 }, // Date
-      1: { halign: 'left', fontStyle: 'bold', cellWidth: 40 }, // Student
-      2: { cellWidth: 15 }, // Div
-      3: { halign: 'left', cellWidth: 100 }, // Items
-      4: { halign: 'right', fontStyle: 'bold' } // Amount
+      0: { cellWidth: 35 }, // Date
+      1: { halign: 'left', fontStyle: 'bold', cellWidth: 30 }, // Student
+      2: { cellWidth: 12 }, // Div
+      3: { cellWidth: 25 }, // Phone
+      4: { cellWidth: 35 }, // School
+      5: { halign: 'left', cellWidth: 80 }, // Items
+      6: { halign: 'right', fontStyle: 'bold' } // Amount
     }
   });
 

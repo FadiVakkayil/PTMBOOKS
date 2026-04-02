@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Check, ShoppingCart, User, Landmark, IndianRupee, Loader2, AlertCircle, Plus, Minus } from 'lucide-react';
+import { X, Check, ShoppingCart, User, Landmark, IndianRupee, Loader2, AlertCircle, Plus, Minus, Phone, School } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { generateReceipt } from '@/utils/receiptGenerator';
@@ -27,6 +27,8 @@ export default function DistributionModal({ isOpen, onClose, books, onSuccess }:
   const { user } = useAuth();
   const [studentName, setStudentName] = useState('');
   const [division, setDivision] = useState('');
+  const [phone, setPhone] = useState('');
+  const [school, setSchool] = useState('');
   const [cart, setCart] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(false);
 
@@ -91,6 +93,8 @@ export default function DistributionModal({ isOpen, onClose, books, onSuccess }:
       const { error } = await supabase.rpc('record_bulk_sale', {
         p_student_name: studentName,
         p_division: division,
+        p_phone: phone,
+        p_school: school,
         p_items: saleItems,
         p_total_amount: totalAmount,
         p_staff_name: user || 'Staff'
@@ -99,7 +103,7 @@ export default function DistributionModal({ isOpen, onClose, books, onSuccess }:
       if (error) throw error;
 
       // 2. Generate Receipt
-      generateReceipt(studentName, division, saleItems, totalAmount, user || 'Staff');
+      generateReceipt(studentName, division, saleItems, totalAmount, user || 'Staff', phone, school);
 
       toast.success('Distribution recorded and bill generated!');
       onSuccess();
@@ -114,6 +118,8 @@ export default function DistributionModal({ isOpen, onClose, books, onSuccess }:
   const handleClose = () => {
     setStudentName('');
     setDivision('');
+    setPhone('');
+    setSchool('');
     setCart({});
     onClose();
   };
@@ -174,6 +180,34 @@ export default function DistributionModal({ isOpen, onClose, books, onSuccess }:
                       onChange={(e) => setDivision(e.target.value)}
                       placeholder="10 C"
                       className="w-full pl-12 pr-4 py-4 bg-secondary rounded-2xl border border-primary/5 focus:border-primary/20 focus:outline-none transition-all font-black text-center uppercase"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-foreground/40 ml-1">Phone Number</label>
+                  <div className="relative group">
+                    <Phone size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/40 group-focus-within:text-primary transition-colors" />
+                    <input
+                      type="text"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="+91 00000 00000"
+                      className="w-full pl-12 pr-4 py-4 bg-secondary rounded-2xl border border-primary/5 focus:border-primary/20 focus:outline-none transition-all font-bold"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-foreground/40 ml-1">Customer School</label>
+                  <div className="relative group">
+                    <School size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/40 group-focus-within:text-primary transition-colors" />
+                    <input
+                      type="text"
+                      value={school}
+                      onChange={(e) => setSchool(e.target.value)}
+                      placeholder="School Name"
+                      className="w-full pl-12 pr-4 py-4 bg-secondary rounded-2xl border border-primary/5 focus:border-primary/20 focus:outline-none transition-all font-bold"
                     />
                   </div>
                 </div>
