@@ -350,7 +350,7 @@ export default function DistributionModal({ isOpen, onClose, books, onSuccess }:
                       </div>
                     </div>
 
-                    <div className="bg-slate-100 rounded-3xl overflow-hidden border border-slate-200 flex-1 relative min-h-[400px] shadow-inner p-4 flex items-center justify-center">
+                    <div className="bg-slate-100 rounded-3xl overflow-hidden border border-slate-200 flex-1 relative min-h-[450px] shadow-inner p-6 flex flex-col items-center">
                       <div className="absolute top-2 left-1/2 -translate-x-1/2 z-10 bg-white/80 backdrop-blur-md px-4 py-1 rounded-full border border-slate-200 text-[9px] font-black uppercase tracking-widest text-slate-400">Preview Mode</div>
                       
                       {/* Hidden Iframe for Actual Printing */}
@@ -362,7 +362,7 @@ export default function DistributionModal({ isOpen, onClose, books, onSuccess }:
                       />
 
                       {saleItemsData.length > 0 ? (
-                        <div className="w-full transform scale-[0.9] origin-center">
+                        <div className="w-full max-w-md">
                           <VirtualReceipt 
                             studentName={studentName}
                             division={division}
