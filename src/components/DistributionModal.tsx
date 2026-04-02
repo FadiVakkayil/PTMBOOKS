@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { getReceiptBlobUrl, generateReceipt } from '@/utils/receiptGenerator';
 import { useAuth } from './AuthContext';
+import VirtualReceipt from './VirtualReceipt';
 
 interface Book {
   id: string;
@@ -34,6 +35,7 @@ export default function DistributionModal({ isOpen, onClose, books, onSuccess }:
   const [view, setView] = useState<'form' | 'receipt'>('form');
   const [receiptUrl, setReceiptUrl] = useState<string | null>(null);
   const [saleItemsData, setSaleItemsData] = useState<any[]>([]);
+  const [transactionDate, setTransactionDate] = useState('');
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   // Show all books, regardless of stock
@@ -105,9 +107,12 @@ export default function DistributionModal({ isOpen, onClose, books, onSuccess }:
       if (error) throw error;
 
       // 2. Generate Receipt Preview
+      const dateStr = new Date().toLocaleString();
       const blobUrl = getReceiptBlobUrl(studentName, division, saleItems, totalAmount, user || 'Staff', phone, school);
+      
       setReceiptUrl(blobUrl);
       setSaleItemsData(saleItems);
+      setTransactionDate(dateStr);
       setView('receipt');
 
       toast.success('Distribution recorded!');
@@ -345,17 +350,32 @@ export default function DistributionModal({ isOpen, onClose, books, onSuccess }:
                       </div>
                     </div>
 
-                    <div className="bg-slate-100 rounded-3xl overflow-hidden border border-slate-200 flex-1 relative min-h-[350px] shadow-inner">
+                    <div className="bg-slate-100 rounded-3xl overflow-hidden border border-slate-200 flex-1 relative min-h-[400px] shadow-inner p-4 flex items-center justify-center">
                       <div className="absolute top-2 left-1/2 -translate-x-1/2 z-10 bg-white/80 backdrop-blur-md px-4 py-1 rounded-full border border-slate-200 text-[9px] font-black uppercase tracking-widest text-slate-400">Preview Mode</div>
-                      {receiptUrl ? (
-                        <iframe 
-                          ref={iframeRef}
-                          src={`${receiptUrl}#toolbar=0&navpanes=0&scrollbar=0`} 
-                          className="w-full h-full border-none"
-                          title="Receipt Preview"
-                        />
+                      
+                      {/* Hidden Iframe for Actual Printing */}
+                      <iframe 
+                        ref={iframeRef}
+                        src={receiptUrl || ''} 
+                        className="hidden"
+                        title="Receipt Print Frame"
+                      />
+
+                      {saleItemsData.length > 0 ? (
+                        <div className="w-full transform scale-[0.9] origin-center">
+                          <VirtualReceipt 
+                            studentName={studentName}
+                            division={division}
+                            items={saleItemsData}
+                            totalAmount={totalAmount}
+                            staffName={user || 'Staff'}
+                            date={transactionDate}
+                            phone={phone}
+                            schoolName={school}
+                          />
+                        </div>
                       ) : (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center text-foreground/20">
+                        <div className="flex flex-col items-center justify-center text-foreground/20">
                           <Loader2 size={40} className="animate-spin mb-4" />
                           <p className="font-bold">Generating Preview...</p>
                         </div>
