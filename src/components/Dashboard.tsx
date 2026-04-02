@@ -70,7 +70,8 @@ export default function Dashboard() {
           'Biology': 1, 'Chemistry': 1, 'Physics': 1, 'Information Technology (IT)': 1,
           'Social Science 1': 2, 'Social Science 2': 2,
           'Maths': 3,
-          'Urdu': 4, 'Malayalam 1': 4, 'കേരള പാഠാവലി': 4, 'Sanskrit': 4, 'Arabic': 4, 'Malayalam 2': 4, 'അടിസ്ഥാന പാഠാവലി': 4
+          'Urdu': 4, 'Malayalam 1': 4, 'കേരള പാഠാവലി': 4, 'Sanskrit': 4, 'Arabic': 4, 'Malayalam 2': 4, 'അടിസ്ഥാന പാഠാവലി': 4,
+          'PHYSICAL EDUCATION': 5, 'ART EDUCATION': 5, 'WORK EDUCATION': 5
         };
 
         const displayMap: Record<string, string> = {
