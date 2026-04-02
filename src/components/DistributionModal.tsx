@@ -32,10 +32,8 @@ export default function DistributionModal({ isOpen, onClose, books, onSuccess }:
   const [cart, setCart] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(false);
 
-  // Filter books to only those with stock
-  const availableBooks = useMemo(() => {
-    return books.filter(b => (b.stock_total - b.stock_sold) > 0);
-  }, [books]);
+  // Show all books, regardless of stock
+  const allBooks = useMemo(() => books, [books]);
 
   const updateCart = (bookId: string, delta: number) => {
     const book = books.find(b => b.id === bookId);
@@ -217,35 +215,46 @@ export default function DistributionModal({ isOpen, onClose, books, onSuccess }:
               <div className="space-y-4">
                 <label className="text-[10px] font-black uppercase tracking-widest text-foreground/40 ml-1">Select Textbooks</label>
                 <div className="grid gap-3">
-                  {availableBooks.length > 0 ? (
-                    availableBooks.map((book) => (
-                      <div 
-                        key={book.id}
-                        className={`p-4 rounded-2xl border transition-all flex items-center justify-between ${
-                          cart[book.id] ? 'bg-primary/5 border-primary/20' : 'bg-secondary/50 border-transparent hover:border-primary/10'
-                        }`}
-                      >
-                        <div className="flex-1">
-                          <p className="font-bold text-foreground leading-tight">{book.subject_name}</p>
-                          <p className="text-[10px] font-bold text-foreground/30 uppercase">₹{book.price} per unit • <span className="text-emerald-600/60">{book.stock_total - book.stock_sold} Left</span></p>
+                  {allBooks.length > 0 ? (
+                    allBooks.map((book) => {
+                      const available = book.stock_total - book.stock_sold;
+                      const isOutOfStock = available <= 0;
+                      
+                      return (
+                        <div 
+                          key={book.id}
+                          className={`p-4 rounded-2xl border transition-all flex items-center justify-between ${
+                            cart[book.id] ? 'bg-primary/5 border-primary/20' : 'bg-secondary/50 border-transparent hover:border-primary/10'
+                          } ${isOutOfStock ? 'opacity-60' : ''}`}
+                        >
+                          <div className="flex-1">
+                            <p className="font-bold text-foreground leading-tight">{book.subject_name}</p>
+                            <p className="text-[10px] font-bold uppercase">
+                              <span className="text-foreground/30">₹{book.price} per unit</span>
+                              <span className="mx-2 text-foreground/10 text-xs">|</span>
+                              <span className={isOutOfStock ? 'text-red-500' : 'text-emerald-600/60'}>
+                                {isOutOfStock ? 'Out of Stock' : `${available} Units Left`}
+                              </span>
+                            </p>
+                          </div>
+                          <div className={`flex items-center gap-4 bg-white/50 p-1 rounded-xl shadow-inner ${isOutOfStock ? 'grayscale pointer-events-none' : ''}`}>
+                            <button 
+                              onClick={() => updateCart(book.id, -1)}
+                              className="p-2 hover:bg-red-50 text-red-500 rounded-lg transition-colors"
+                            >
+                              <Minus size={16} />
+                            </button>
+                            <span className="w-8 text-center font-black text-lg">{cart[book.id] || 0}</span>
+                            <button 
+                              onClick={() => updateCart(book.id, 1)}
+                              className="p-2 hover:bg-emerald-50 text-emerald-500 rounded-lg transition-colors"
+                            >
+                              <Plus size={16} />
+                            </button>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-4 bg-white/50 p-1 rounded-xl shadow-inner">
-                          <button 
-                            onClick={() => updateCart(book.id, -1)}
-                            className="p-2 hover:bg-red-50 text-red-500 rounded-lg transition-colors"
-                          >
-                            <Minus size={16} />
-                          </button>
-                          <span className="w-8 text-center font-black text-lg">{cart[book.id] || 0}</span>
-                          <button 
-                            onClick={() => updateCart(book.id, 1)}
-                            className="p-2 hover:bg-emerald-50 text-emerald-500 rounded-lg transition-colors"
-                          >
-                            <Plus size={16} />
-                          </button>
-                        </div>
-                      </div>
-                    ))
+                      );
+                    })
                   ) : (
                     <div className="text-center py-8 bg-secondary/30 rounded-3xl border border-dashed border-primary/10">
                       <AlertCircle size={32} className="mx-auto text-primary/20 mb-2" />
