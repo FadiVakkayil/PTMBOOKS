@@ -333,7 +333,7 @@ export default function DistributionModal({ isOpen, onClose, books, onSuccess }:
                   exit={{ opacity: 0, x: -20 }}
                   className="flex flex-col flex-1 overflow-hidden"
                 >
-                  <div className="p-8 flex-1 flex flex-col gap-6">
+                  <div className="p-8 flex-1 flex flex-col gap-6 overflow-y-auto custom-scrollbar">
                     <div className="flex items-center justify-between bg-primary/5 p-4 rounded-2xl border border-primary/10">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-primary text-white rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
