@@ -22,30 +22,43 @@ const getReceiptDoc = (
   const date = new Date().toLocaleString();
 
   // Header
-  doc.setFontSize(18);
-  doc.setTextColor(37, 99, 235);
-  doc.text('PTM HSS THRIKKADEERI', 74, 20, { align: 'center' });
+  doc.setFontSize(22);
+  doc.setTextColor(30, 41, 59); // Darker blue-gray
+  doc.setFont('helvetica', 'bold');
+  doc.text('PTM HSS THRIKKADEERI', 74, 18, { align: 'center' });
   
   doc.setFontSize(10);
   doc.setTextColor(100);
-  doc.text('Textbook Distribution Receipt', 74, 26, { align: 'center' });
+  doc.setFont('helvetica', 'normal');
+  doc.text('OFFICIAL TEXTBOOK DISTRIBUTION RECEIPT', 74, 24, { align: 'center' });
   
-  doc.setDrawColor(200);
-  doc.line(10, 32, 138, 32);
+  doc.setDrawColor(226, 232, 240); // Lighter gray
+  doc.setLineWidth(0.5);
+  doc.line(10, 28, 138, 28);
 
-  // Student Info
+  // Student Info Block
+  doc.setFillColor(248, 250, 252); // Very light blue-gray
+  doc.roundedRect(10, 34, 128, 28, 2, 2, 'F');
+  
+  doc.setFontSize(10);
+  doc.setTextColor(100);
+  doc.text('DISTRIBUTED TO:', 14, 40);
+  
+  doc.setTextColor(30, 41, 59);
   doc.setFontSize(11);
-  doc.setTextColor(0);
   doc.setFont('helvetica', 'bold');
-  doc.text(`Student: ${studentName}`, 14, 42);
-  doc.text(`Division: ${division}`, 14, 48);
-  if (phone) doc.text(`Phone: ${phone}`, 14, 54);
-  if (schoolName) doc.text(`School: ${schoolName}`, 14, 60);
+  doc.text(`${studentName} (${division})`, 14, 46);
   
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
-  doc.text(`Date: ${date}`, 138, 42, { align: 'right' });
-  doc.text(`Issuer: ${staffName}`, 138, 48, { align: 'right' });
+  if (phone) doc.text(`Phone: ${phone}`, 14, 52);
+  if (schoolName) doc.text(`School: ${schoolName}`, 14, 58);
+  
+  // Date and Issuer (Right Aligned)
+  doc.setFontSize(8);
+  doc.setTextColor(150);
+  doc.text(`DATE: ${date}`, 134, 40, { align: 'right' });
+  doc.text(`ISSUER: ${staffName.toUpperCase()}`, 134, 45, { align: 'right' });
 
   // Table
   const tableData = items.map(item => [
@@ -56,10 +69,10 @@ const getReceiptDoc = (
   ]);
 
   autoTable(doc, {
-    startY: schoolName ? 65 : (phone ? 60 : 55),
-    head: [['Subject', 'Qty', 'Price', 'Subtotal']],
+    startY: 68,
+    head: [['BOOK SUBJECT', 'QTY', 'UNIT PRICE', 'SUBTOTAL']],
     body: tableData,
-    foot: [['', '', 'TOTAL AMOUNT', `Rs. ${totalAmount.toFixed(1)}`]],
+    foot: [['', '', 'TOTAL AMOUNT', `Rs. ${totalAmount.toFixed(2)}` ]],
     theme: 'grid',
     headStyles: { fillColor: [37, 99, 235], halign: 'center', fontSize: 9 },
     footStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold', halign: 'center', fontSize: 9 },

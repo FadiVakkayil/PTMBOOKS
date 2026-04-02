@@ -329,7 +329,24 @@ export default function DistributionModal({ isOpen, onClose, books, onSuccess }:
                   className="flex flex-col flex-1 overflow-hidden"
                 >
                   <div className="p-8 flex-1 flex flex-col gap-6">
-                    <div className="bg-secondary/50 rounded-3xl overflow-hidden border border-primary/10 flex-1 relative min-h-[300px]">
+                    <div className="flex items-center justify-between bg-primary/5 p-4 rounded-2xl border border-primary/10">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-primary text-white rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
+                          <FileText size={20} />
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-black uppercase tracking-widest text-primary/60">Ready to Print</p>
+                          <h4 className="font-bold text-foreground">Official Receipt Generated</h4>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                         <span className="px-3 py-1 bg-white border border-primary/10 rounded-full text-[10px] font-bold text-primary uppercase">A5 Format</span>
+                         <span className="px-3 py-1 bg-emerald-500 rounded-full text-[10px] font-bold text-white uppercase shadow-sm">Verified</span>
+                      </div>
+                    </div>
+
+                    <div className="bg-slate-100 rounded-3xl overflow-hidden border border-slate-200 flex-1 relative min-h-[350px] shadow-inner">
+                      <div className="absolute top-2 left-1/2 -translate-x-1/2 z-10 bg-white/80 backdrop-blur-md px-4 py-1 rounded-full border border-slate-200 text-[9px] font-black uppercase tracking-widest text-slate-400">Preview Mode</div>
                       {receiptUrl ? (
                         <iframe 
                           ref={iframeRef}
