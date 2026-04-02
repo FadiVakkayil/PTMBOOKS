@@ -3,11 +3,13 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/lib/supabase';
-import { Search, Loader2, Download, AlertCircle, Clock, FileText, Undo2, Redo2 } from 'lucide-react';
+import { Search, Loader2, Download, AlertCircle, Clock, FileText, Undo2, Redo2, Plus } from 'lucide-react';
 import TextbookCard from './TextbookCard';
 import { generateReport } from '@/utils/reportGenerator';
 import RecentActivity from './RecentActivity';
 import { toast } from 'sonner';
+import DistributionModal from './DistributionModal';
+import { generateSalesLedger } from '@/utils/salesLedgerGenerator';
 
 interface Book {
   id: string;
@@ -28,6 +30,8 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [reportLoading, setReportLoading] = useState(false);
+  const [ledgerLoading, setLedgerLoading] = useState(false);
+  const [isDistributionOpen, setIsDistributionOpen] = useState(false);
 
   const fetchBooks = async () => {
     setLoading(true);
@@ -66,10 +70,18 @@ export default function Dashboard() {
           'Biology': 1, 'Chemistry': 1, 'Physics': 1, 'Information Technology (IT)': 1,
           'Social Science 1': 2, 'Social Science 2': 2,
           'Maths': 3,
-          'Urdu': 4, 'Malayalam 1': 4, 'Sanskrit': 4, 'Arabic': 4, 'Malayalam 2': 4
+          'Urdu': 4, 'Malayalam 1': 4, 'കേരള പാഠാവലി': 4, 'Sanskrit': 4, 'Arabic': 4, 'Malayalam 2': 4, 'അടിസ്ഥാന പാഠാവലി': 4
         };
 
-        const sortedData = Object.values(deduplicated).sort((a, b) => {
+        const displayMap: Record<string, string> = {
+          'Malayalam 1': 'കേരള പാഠാവലി',
+          'Malayalam 2': 'അടിസ്ഥാന പാഠാവലി'
+        };
+
+        const sortedData = Object.values(deduplicated).map(b => ({
+          ...b,
+          subject_name: displayMap[b.subject_name] || b.subject_name
+        })).sort((a, b) => {
           const pA = subjectPriority[a.subject_name] || 99;
           const pB = subjectPriority[b.subject_name] || 99;
           if (pA !== pB) return pA - pB;
@@ -98,6 +110,23 @@ export default function Dashboard() {
       alert('Failed to generate report: ' + err.message);
     } finally {
       setReportLoading(false);
+    }
+  };
+
+  const handleDownloadLedger = async () => {
+    setLedgerLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('sales')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      if (data) generateSalesLedger(data);
+    } catch (err: any) {
+      toast.error('Failed to load sales ledger: ' + err.message);
+    } finally {
+      setLedgerLoading(false);
     }
   };
 
@@ -197,19 +226,27 @@ export default function Dashboard() {
             <h2 className="text-4xl font-bold font-outfit text-center flex-1 text-primary">Textbook Inventory</h2>
             <div className="w-full md:w-auto flex justify-center md:justify-end flex-1 gap-3">
               <button 
-                onClick={() => setIsHistoryOpen(true)}
-                className="flex items-center gap-2 px-6 py-3 bg-white text-primary rounded-xl font-bold hover:bg-primary hover:text-white border border-primary/20 transition-all shadow-sm active:scale-95"
+                onClick={handleDownloadLedger}
+                disabled={ledgerLoading}
+                className="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-secondary text-primary rounded-xl font-bold hover:bg-primary hover:text-white transition-all shadow-sm border border-primary/10 disabled:opacity-50"
               >
-                <Clock size={20} />
-                <span className="hidden sm:inline">History</span>
+                {ledgerLoading ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} />}
+                Sales Ledger
               </button>
               <button 
                 onClick={handleGenerateReport}
                 disabled={reportLoading}
-                className="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-bold hover:bg-accent transition-all shadow-lg shadow-primary/20 disabled:opacity-50"
+                className="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-white text-primary rounded-xl font-bold hover:bg-primary hover:text-white border border-primary/20 transition-all shadow-sm active:scale-95 disabled:opacity-50"
               >
                 {reportLoading ? <Loader2 size={18} className="animate-spin" /> : <FileText size={18} />}
-                Generate Report
+                Audit Report
+              </button>
+              <button 
+                onClick={() => setIsDistributionOpen(true)}
+                className="w-full md:w-auto flex items-center justify-center gap-2 px-8 py-3 bg-primary text-white rounded-xl font-bold hover:bg-accent transition-all shadow-lg shadow-primary/20 active:scale-95"
+              >
+                <Plus size={18} />
+                New Distribution
               </button>
             </div>
           </div>
@@ -328,6 +365,12 @@ export default function Dashboard() {
         isOpen={isHistoryOpen} 
         onClose={() => setIsHistoryOpen(false)} 
         onActionUndone={fetchBooks}
+      />
+      <DistributionModal 
+        isOpen={isDistributionOpen}
+        onClose={() => setIsDistributionOpen(false)}
+        books={books}
+        onSuccess={fetchBooks}
       />
     </section>
   );

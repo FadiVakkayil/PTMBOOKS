@@ -37,7 +37,12 @@ export const generateReport = (books: Book[]) => {
     'Biology': 1, 'Chemistry': 1, 'Physics': 1, 'Information Technology (IT)': 1,
     'Social Science 1': 2, 'Social Science 2': 2,
     'Maths': 3,
-    'Urdu': 4, 'Malayalam 1': 4, 'Sanskrit': 4, 'Arabic': 4, 'Malayalam 2': 4
+    'Urdu': 4, 'Malayalam 1': 4, 'കേരള പാഠാവലി': 4, 'Sanskrit': 4, 'Arabic': 4, 'Malayalam 2': 4, 'അടിസ്ഥാന പാഠാവലി': 4
+  };
+
+  const displayMap: Record<string, string> = {
+    'Malayalam 1': 'കേരള പാഠാവലി',
+    'Malayalam 2': 'അടിസ്ഥാന പാഠാവലി'
   };
 
   classes.forEach((classNum) => {
@@ -116,7 +121,7 @@ export const generateReport = (books: Book[]) => {
           grandTotalBalance += netBalance;
 
           return [
-            book.subject_name,
+            displayMap[book.subject_name] || book.subject_name,
             qtyArr.toString(),
             qtySold.toString(),
             remaining.toString(),
