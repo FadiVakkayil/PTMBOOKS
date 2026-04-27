@@ -16,33 +16,57 @@ export const generateReport = (books: Book[]) => {
   const doc = new jsPDF('l', 'mm', 'a4'); // Landscape
   const date = new Date().toLocaleDateString();
 
-  // Header
-  doc.setFontSize(24);
-  doc.setTextColor(37, 99, 235); // Primary Blue
-  doc.text('PTM HSS THRIKKADEERI', 14, 22);
-  
-  doc.setFontSize(12);
-  doc.setTextColor(100);
-  doc.text(`Official Textbook Inventory & Financial Audit Report | Generated: ${date}`, 14, 30);
-  doc.line(14, 34, 283, 34);
-
-  let grandTotalBalance = 0;
-  let currentY = 45;
-
-  const classes = ['9', '10'];
-  const mediums = ['Malayalam', 'English', 'Shared'];
-
-  // Subject Priority Sorting
+  // --- CONFIGURATION ---
   const displayMap: Record<string, string> = {
     'Malayalam 1': 'Adisthana Padavali',
     'Malayalam 2': 'Kerala Padavali',
     'Adisthana Padavali (Mal 1)': 'Adisthana Padavali',
     'Kerala Padavali (Mal 2)': 'Kerala Padavali',
+    'Adisthana Padavali Malayalam': 'Adisthana Padavali',
+    'Kerala Padavali Malayalam': 'Kerala Padavali',
     'കേരള പാഠാവലി': 'Kerala Padavali',
     'അടിസ്ഥാന പാഠാവലി': 'Adisthana Padavali',
     'Maths': 'Mathematics',
+    'Mathematics (Eng)': 'Mathematics',
+    'Mathematics (Mal)': 'Mathematics',
+    'Mathematics (M)': 'Mathematics',
+    'Mathematics (E)': 'Mathematics',
     'IT': 'Information Technology (IT)',
+    'I.C.T.': 'Information Technology (IT)',
+    'I.C.T. (M)': 'Information Technology (IT)',
+    'I.C.T. (E)': 'Information Technology (IT)',
+    'I.C.T. Mal': 'Information Technology (IT)',
+    'I.C.T. Eng': 'Information Technology (IT)',
+    'Chemistry (M)': 'Chemistry',
+    'Chemistry (E)': 'Chemistry',
+    'Chemistry (Mal)': 'Chemistry',
+    'Chemistry (Eng)': 'Chemistry',
+    'Physics (M)': 'Physics',
+    'Physics (E)': 'Physics',
+    'Physics (Mal)': 'Physics',
+    'Physics (Eng)': 'Physics',
+    'Biology (M)': 'Biology',
+    'Biology (E)': 'Biology',
+    'Biology (Mal)': 'Biology',
+    'Biology (Eng)': 'Biology',
+    'Social Science (1) Mal': 'Social Science 1',
+    'Social Science (1) Eng': 'Social Science 1',
+    'Social Science (2) Mal': 'Social Science 2',
+    'Social Science (2) Eng': 'Social Science 2',
+    'Social Science (1) (M)': 'Social Science 1',
+    'Social Science (1) (E)': 'Social Science 1',
+    'Social Science (2) (M)': 'Social Science 2',
+    'Social Science (2) (E)': 'Social Science 2',
+    'Kerala Reader English': 'English',
+    'Kerala Reader Hindi': 'Hindi',
+    'Kerala Reader Arabic (Academic)': 'Arabic',
+    'Kerala Reader Urdu': 'Urdu',
+    'Kerala Reader Sanskrit': 'Sanskrit',
     'Work Education (Agriculture)': 'Work Education (Agriculture)',
+    'Work education (agriculture)': 'Work Education (Agriculture)',
+    'Work education clothing(M)': 'Work Education (Clothing)',
+    'Work education Printing(M)': 'Work Education (Printing)',
+    'Work Integrated Education - Activity Book (Eng)': 'Work Education',
     'Work Education (Others)': 'Work Education'
   };
 
@@ -52,163 +76,153 @@ export const generateReport = (books: Book[]) => {
     'Mathematics': 3,
     'English': 4, 'Hindi': 5, 'Urdu': 6, 'Arabic': 7, 'Sanskrit': 8,
     'Kerala Padavali': 9, 'Adisthana Padavali': 10,
-    'Physical Education': 11, 'Art Education': 12, 'Work Education': 13
+    'Physical Education': 11, 'Art Education': 12, 'Work Education': 13,
+    'Work Education (Agriculture)': 13, 'Work Education (Clothing)': 13, 'Work Education (Printing)': 13
   };
+
+  // --- STATS TRACKING ---
+  const stats = {
+    class9: { revenue: 0, cost: 0, stockValue: 0 },
+    class10: { revenue: 0, cost: 0, stockValue: 0 },
+    languages: { revenue: 0, cost: 0, stockValue: 0 },
+    grand: { revenue: 0, cost: 0, stockValue: 0 }
+  };
+
+  const classes = ['9', '10'];
+  const mediums = ['Malayalam', 'English', 'Shared'];
+  let firstPage = true;
 
   classes.forEach((classNum) => {
     mediums.forEach((medium) => {
-      // 1. Filter books for this section
-      const sectionBooks = books.filter((b) => {
-        if (b.class_number !== classNum) return false;
-        if (medium === 'Shared') {
-          return b.medium === 'Shared';
-        } else {
-          return b.medium === medium;
+      // 1. Filter and Group
+      const sectionBooks = books.filter(b => b.class_number === classNum && b.medium === medium);
+      if (sectionBooks.length === 0) return;
+
+      const grouped = sectionBooks.reduce((acc, current) => {
+        const name = displayMap[current.subject_name] || current.subject_name;
+        if (!acc[name]) {
+          acc[name] = { ...current, subject_name: name, stock_total: 0, stock_sold: 0 };
         }
+        acc[name].stock_total += Number(current.stock_total || 0);
+        acc[name].stock_sold += Number(current.stock_sold || 0);
+        return acc;
+      }, {} as Record<string, any>);
+
+      const sorted = Object.values(grouped).sort((a: any, b: any) => {
+        const pA = subjectPriority[a.subject_name] || 99;
+        const pB = subjectPriority[b.subject_name] || 99;
+        return pA !== pB ? pA - pB : a.subject_name.localeCompare(b.subject_name);
       });
 
-      if (sectionBooks.length > 0) {
-        // 2. Group by subject_name to remove duplicates
-        const grouped = sectionBooks.reduce((acc, current) => {
-          const mappedName = displayMap[current.subject_name] || current.subject_name;
-          const key = mappedName;
-          if (!acc[key]) {
-            acc[key] = {
-              subject_name: mappedName,
-              class_number: current.class_number,
-              medium: current.medium,
-              stock_total: Number(current.stock_total || 0),
-              stock_sold: Number(current.stock_sold || 0),
-              price: Number(current.price || 0),
-              cost_price: Number(current.cost_price || 0)
-            };
-          } else {
-            acc[key].stock_total += Number(current.stock_total || 0);
-            acc[key].stock_sold += Number(current.stock_sold || 0);
-            acc[key].price = current.price ? Number(current.price) : acc[key].price;
-            acc[key].cost_price = current.cost_price ? Number(current.cost_price) : acc[key].cost_price;
-          }
-          return acc;
-        }, {} as Record<string, any>);
+      // 2. Page Management
+      if (!firstPage) doc.addPage();
+      firstPage = false;
 
-        // 3. Sort grouped books
-        const sortedBooks = Object.values(grouped).sort((a: any, b: any) => {
-          const pA = subjectPriority[a.subject_name] || 99;
-          const pB = subjectPriority[b.subject_name] || 99;
-          if (pA !== pB) return pA - pB;
-          return a.subject_name.localeCompare(b.subject_name);
-        });
+      // 3. Header for Page
+      doc.setFontSize(22);
+      doc.setTextColor(37, 99, 235);
+      doc.text('PTM HSS THRIKKADEERI', 14, 18);
+      doc.setFontSize(10);
+      doc.setTextColor(100);
+      doc.text(`Inventory Audit Report | ${date} | Class ${classNum} - ${medium === 'Shared' ? 'Languages' : medium + ' Medium'}`, 14, 25);
+      doc.line(14, 28, 283, 28);
 
-        if (currentY > 170) {
-          doc.addPage();
-          currentY = 20;
+      // 4. Table Data
+      let sArrived = 0, sSold = 0, sCost = 0, sRev = 0;
+      const tableData = sorted.map((b: any) => {
+        const qty = b.stock_total;
+        const sold = b.stock_sold;
+        const cost = b.cost_price;
+        const price = b.price;
+        const rem = qty - sold;
+        const tCost = qty * cost;
+        const tRev = sold * price;
+        const bal = tRev - tCost;
+
+        sArrived += qty; sSold += sold; sCost += tCost; sRev += tRev;
+        
+        // Update stats
+        const target = classNum === '9' ? stats.class9 : stats.class10;
+        target.revenue += tRev;
+        target.cost += tCost;
+        target.stockValue += (rem * cost);
+        
+        if (medium === 'Shared') {
+          stats.languages.revenue += tRev;
+          stats.languages.cost += tCost;
+          stats.languages.stockValue += (rem * cost);
         }
 
-        doc.setFontSize(16);
-        doc.setTextColor(50);
-        doc.setFont('helvetica', 'bold');
-        
-        const title = medium === 'Shared' ? `Class ${classNum} - Languages` : `Class ${classNum} - ${medium} Medium`;
-        doc.text(title, 14, currentY);
-        currentY += 8;
+        stats.grand.revenue += tRev;
+        stats.grand.cost += tCost;
+        stats.grand.stockValue += (rem * cost);
 
-        let sectionArrived = 0;
-        let sectionSold = 0;
-        let sectionRem = 0;
-        let sectionTotalCost = 0;
-        let sectionTotalRevenue = 0;
-        let sectionNetBalance = 0;
+        return [
+          b.subject_name, qty, sold, rem, 
+          `Rs. ${cost.toFixed(1)}`, `Rs. ${tCost.toFixed(1)}`,
+          `Rs. ${price.toFixed(1)}`, `Rs. ${tRev.toFixed(1)}`,
+          { content: `Rs. ${bal.toFixed(1)}`, styles: { textColor: bal < 0 ? [220, 38, 38] : [22, 163, 74] } }
+        ];
+      });
 
-        const tableData = sortedBooks.map((book: any) => {
-          const qtyArr = Number(book.stock_total || 0);
-          const qtySold = Number(book.stock_sold || 0);
-          const unitCost = Number(book.cost_price || 0);
-          const unitPrice = Number(book.price || 0);
-          
-          const remaining = qtyArr - qtySold;
-          const totalCost = qtyArr * unitCost; // PROCUREMENT COST
-          const totalRevenue = qtySold * unitPrice; // ACTUAL INCOME
-          const netBalance = totalRevenue - totalCost; // SURPLUS OR LOSS
-          
-          sectionArrived += qtyArr;
-          sectionSold += qtySold;
-          sectionRem += remaining;
-          sectionTotalCost += totalCost;
-          sectionTotalRevenue += totalRevenue;
-          sectionNetBalance += netBalance;
-          grandTotalBalance += netBalance;
-
-          return [
-            book.subject_name,
-            qtyArr.toString(),
-            qtySold.toString(),
-            remaining.toString(),
-            `Rs. ${unitCost.toFixed(2)}`,
-            `Rs. ${totalCost.toFixed(2)}`,
-            `Rs. ${unitPrice.toFixed(2)}`,
-            `Rs. ${totalRevenue.toFixed(2)}`,
-            {
-              content: `${netBalance < 0 ? '-' : '+'}Rs. ${Math.abs(netBalance).toFixed(2)}`,
-              styles: { textColor: netBalance < 0 ? [220, 38, 38] : [22, 163, 74] } // Red for Loss, Green for Profit
-            }
-          ];
-        });
-
-        autoTable(doc, {
-          startY: currentY,
-          head: [['Subject', 'Arr', 'Dist', 'Rem', 'U.Cost', 'T.Cost', 'U.Price', 'T.Rev', 'Net Balance']],
-          body: tableData,
-          foot: [[
-            'TOTALS', 
-            sectionArrived.toString(), 
-            sectionSold.toString(), 
-            sectionRem.toString(),
-            '-', 
-            `Rs. ${sectionTotalCost.toFixed(1)}`, 
-            '-', 
-            `Rs. ${sectionTotalRevenue.toFixed(1)}`,
-            {
-              content: `${sectionNetBalance < 0 ? '-' : '+'}Rs. ${Math.abs(sectionNetBalance).toFixed(1)}`,
-              styles: { textColor: sectionNetBalance < 0 ? [220, 38, 38] : [22, 163, 74] }
-            }
-          ]],
-          theme: 'grid',
-          headStyles: { fillColor: [37, 99, 235], halign: 'center', fontSize: 9 },
-          footStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold', halign: 'center', fontSize: 9 },
-          styles: { fontSize: 8.5, cellPadding: 3, halign: 'center' },
-          columnStyles: {
-            0: { cellWidth: 45, halign: 'left' }, // Subject
-            4: { halign: 'right' }, // U.Cost
-            5: { halign: 'right', fontStyle: 'bold' }, // T.Cost
-            6: { halign: 'right' }, // U.Price
-            7: { halign: 'right', fontStyle: 'bold' }, // T.Rev
-            8: { halign: 'right', fontStyle: 'bold' } // Net Balance
-          },
-          margin: { left: 14, right: 14 },
-          didDrawPage: (data) => {
-            currentY = (data as any).cursor.y + 15;
-          }
-        });
-      }
+      autoTable(doc, {
+        startY: 35,
+        head: [['Subject', 'Arrived', 'Sold', 'Rem', 'U.Cost', 'Total Cost', 'U.Price', 'Revenue', 'Balance']],
+        body: tableData,
+        foot: [[
+          'TOTALS', sArrived, sSold, sArrived - sSold, '-', 
+          `Rs. ${sCost.toFixed(0)}`, '-', `Rs. ${sRev.toFixed(0)}`,
+          { content: `Rs. ${(sRev - sCost).toFixed(0)}`, styles: { textColor: (sRev - sCost) < 0 ? [220, 38, 38] : [22, 163, 74] } }
+        ]],
+        theme: 'grid',
+        headStyles: { fillColor: [37, 99, 235], halign: 'center', fontSize: 9 },
+        footStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold', halign: 'center' },
+        styles: { fontSize: 8, cellPadding: 2.5, halign: 'center' },
+        columnStyles: { 0: { cellWidth: 45, halign: 'left' } }
+      });
     });
   });
 
-  // Grand Total Summary
-  if (currentY > 180) {
-    doc.addPage();
-    currentY = 20;
-  }
+  // --- FINAL SUMMARY PAGE ---
+  doc.addPage();
+  doc.setFontSize(24);
+  doc.setTextColor(37, 99, 235);
+  doc.text('CONSOLIDATED FINANCIAL SUMMARY', 14, 25);
+  doc.line(14, 30, 283, 30);
 
-  doc.line(14, currentY, 283, currentY);
-  currentY += 15;
-  doc.setFontSize(22);
-  doc.setTextColor(grandTotalBalance < 0 ? 220 : 22, grandTotalBalance < 0 ? 38 : 163, grandTotalBalance < 0 ? 38 : 74); 
+  const summaryData = [
+    ['Class 9 Total', `Rs. ${stats.class9.cost.toLocaleString()}`, `Rs. ${stats.class9.revenue.toLocaleString()}`, `Rs. ${(stats.class9.revenue - stats.class9.cost).toLocaleString()}`, `Rs. ${stats.class9.stockValue.toLocaleString()}`],
+    ['Class 10 Total', `Rs. ${stats.class10.cost.toLocaleString()}`, `Rs. ${stats.class10.revenue.toLocaleString()}`, `Rs. ${(stats.class10.revenue - stats.class10.cost).toLocaleString()}`, `Rs. ${stats.class10.stockValue.toLocaleString()}`],
+    ['Languages (Shared)', `Rs. ${stats.languages.cost.toLocaleString()}`, `Rs. ${stats.languages.revenue.toLocaleString()}`, `Rs. ${(stats.languages.revenue - stats.languages.cost).toLocaleString()}`, `Rs. ${stats.languages.stockValue.toLocaleString()}`],
+    ['GRAND TOTAL (SCHOOL)', `Rs. ${stats.grand.cost.toLocaleString()}`, `Rs. ${stats.grand.revenue.toLocaleString()}`, `Rs. ${(stats.grand.revenue - stats.grand.cost).toLocaleString()}`, `Rs. ${stats.grand.stockValue.toLocaleString()}`]
+  ];
+
+  autoTable(doc, {
+    startY: 45,
+    head: [['Section', 'Total Procurement Cost', 'Total Revenue Collected', 'Net Cash Balance', 'Current Inventory Value']],
+    body: summaryData,
+    theme: 'striped',
+    headStyles: { fillColor: [22, 163, 74], fontSize: 11 },
+    styles: { fontSize: 10, cellPadding: 5 },
+    columnStyles: { 0: { fontStyle: 'bold' } }
+  });
+
+  // Profit/Loss Explanation
+  const finalY = (doc as any).lastAutoTable.finalY + 15;
+  doc.setFontSize(12);
+  doc.setTextColor(50);
   doc.setFont('helvetica', 'bold');
-  doc.text(`TOTAL SCHOOL ACCOUNT BALANCE: ${grandTotalBalance < 0 ? '-' : '+'}Rs. ${Math.abs(grandTotalBalance).toFixed(2)}`, 14, currentY);
-  
+  doc.text('Audit Insights:', 14, finalY);
+  doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
-  doc.setTextColor(150);
-  doc.text('Note: Net Balance = (Total Money Collected) - (Total Money Spent on Procurement). Red indicates more money was spent than received (Net Loss).', 14, currentY + 10);
+  const insights = [
+    `1. Total School Revenue: Rs. ${stats.grand.revenue.toFixed(2)}`,
+    `2. Total School Procurement Investment: Rs. ${stats.grand.cost.toFixed(2)}`,
+    `3. Net Cash Position: ${stats.grand.revenue - stats.grand.cost >= 0 ? 'Surplus' : 'Deficit'} of Rs. ${Math.abs(stats.grand.revenue - stats.grand.cost).toFixed(2)}`,
+    `4. Estimated Profit on Distributed Books: Rs. ${(stats.grand.revenue - (stats.grand.cost - stats.grand.stockValue)).toFixed(2)}`,
+    `5. Current Stock Asset Value: Rs. ${stats.grand.stockValue.toFixed(2)}`
+  ];
+  insights.forEach((line, i) => doc.text(line, 14, finalY + 8 + (i * 6)));
 
   doc.save(`PTM_HSS_Audit_Report_${date.replace(/\//g, '-')}.pdf`);
 };
