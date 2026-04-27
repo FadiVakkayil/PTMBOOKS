@@ -10,7 +10,7 @@ interface ActivityLog {
   id: string;
   book_id: string;
   subject_name: string;
-  action_type: 'STOCK_ADD' | 'SALE_RECORD' | 'PRICE_CHANGE';
+  action_type: 'STOCK_ADD' | 'SALE_RECORD' | 'PRICE_CHANGE' | 'STOCK_ADJUSTMENT';
   amount: number;
   old_value: number;
   new_value: number;
