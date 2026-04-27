@@ -41,26 +41,39 @@ export default function Dashboard() {
         .from('books')
         .select('*')
         .eq('class_number', selectedClass)
-        .eq('medium', selectedMedium);
+        .or(`medium.eq.${selectedMedium},medium.eq.Shared`);
 
       if (fetchError) {
         setError(`${fetchError.message}. ${fetchError.hint || ''}`);
       } else if (data) {
         // --- DEDUPLICATION LOGIC ---
-        // Group by subject_name to prevent duplicates in the UI
+        // Group by subject_name (mapped to English) to prevent duplicates in the UI
+        const displayMap: Record<string, string> = {
+          'Malayalam 1': 'Adisthana Padavali',
+          'Malayalam 2': 'Kerala Padavali',
+          'Adisthana Padavali (Mal 1)': 'Adisthana Padavali',
+          'Kerala Padavali (Mal 2)': 'Kerala Padavali',
+          'കേരള പാഠാവലി': 'Kerala Padavali',
+          'അടിസ്ഥാന പാഠാവലി': 'Adisthana Padavali',
+          'Maths': 'Mathematics',
+          'Mathematics (Eng)': 'Mathematics',
+          'Mathematics (Mal)': 'Mathematics'
+        };
+
         const deduplicated = (data as Book[]).reduce((acc, current) => {
-          const key = current.subject_name;
+          const mappedName = displayMap[current.subject_name] || current.subject_name;
+          const key = mappedName;
+          
           if (!acc[key]) {
-            acc[key] = { ...current };
+            acc[key] = { ...current, subject_name: mappedName };
           } else {
             // Merge counts
             acc[key].stock_total += current.stock_total;
             acc[key].stock_sold += current.stock_sold;
-            // Use the latest price/cost (the one with the "larger" ID or later)
+            // Use the latest price/cost
             if (current.id > acc[key].id) {
               acc[key].price = current.price;
               acc[key].cost_price = current.cost_price;
-              acc[key].id = current.id;
             }
           }
           return acc;
@@ -69,20 +82,13 @@ export default function Dashboard() {
         const subjectPriority: Record<string, number> = {
           'Biology': 1, 'Chemistry': 1, 'Physics': 1, 'Information Technology (IT)': 1,
           'Social Science 1': 2, 'Social Science 2': 2,
-          'Maths': 3,
-          'Urdu': 4, 'Malayalam 1': 4, 'കേരള പാഠാവലി': 4, 'Sanskrit': 4, 'Arabic': 4, 'Malayalam 2': 4, 'അടിസ്ഥാന പാഠാവലി': 4,
-          'PHYSICAL EDUCATION': 5, 'ART EDUCATION': 5, 'WORK EDUCATION': 5
+          'Maths': 3, 'Mathematics': 3,
+          'English': 4, 'Hindi': 5, 'Urdu': 6, 'Arabic': 7, 'Sanskrit': 8,
+          'Kerala Padavali': 9, 'Adisthana Padavali': 10,
+          'Physical Education': 11, 'Art Education': 12, 'Work Education': 13
         };
 
-        const displayMap: Record<string, string> = {
-          'Malayalam 1': 'കേരള പാഠാവലി',
-          'Malayalam 2': 'അടിസ്ഥാന പാഠാവലി'
-        };
-
-        const sortedData = Object.values(deduplicated).map(b => ({
-          ...b,
-          subject_name: displayMap[b.subject_name] || b.subject_name
-        })).sort((a, b) => {
+        const sortedData = Object.values(deduplicated).sort((a, b) => {
           const pA = subjectPriority[a.subject_name] || 99;
           const pB = subjectPriority[b.subject_name] || 99;
           if (pA !== pB) return pA - pB;

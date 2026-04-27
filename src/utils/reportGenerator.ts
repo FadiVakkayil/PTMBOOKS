@@ -30,35 +30,51 @@ export const generateReport = (books: Book[]) => {
   let currentY = 45;
 
   const classes = ['9', '10'];
-  const mediums = ['Malayalam', 'English'];
+  const mediums = ['Malayalam', 'English', 'Shared'];
 
   // Subject Priority Sorting
+  const displayMap: Record<string, string> = {
+    'Malayalam 1': 'Adisthana Padavali',
+    'Malayalam 2': 'Kerala Padavali',
+    'Adisthana Padavali (Mal 1)': 'Adisthana Padavali',
+    'Kerala Padavali (Mal 2)': 'Kerala Padavali',
+    'കേരള പാഠാവലി': 'Kerala Padavali',
+    'അടിസ്ഥാന പാഠാവലി': 'Adisthana Padavali',
+    'Maths': 'Mathematics',
+    'IT': 'Information Technology (IT)',
+    'Work Education (Agriculture)': 'Work Education (Agriculture)',
+    'Work Education (Others)': 'Work Education'
+  };
+
   const subjectPriority: Record<string, number> = {
     'Biology': 1, 'Chemistry': 1, 'Physics': 1, 'Information Technology (IT)': 1,
     'Social Science 1': 2, 'Social Science 2': 2,
-    'Maths': 3,
-    'Urdu': 4, 'Malayalam 1': 4, 'കേരള പാഠാവലി': 4, 'Sanskrit': 4, 'Arabic': 4, 'Malayalam 2': 4, 'അടിസ്ഥാന പാഠാവലി': 4
-  };
-
-  const displayMap: Record<string, string> = {
-    'Malayalam 1': 'കേരള പാഠാവലി',
-    'Malayalam 2': 'അടിസ്ഥാന പാഠാവലി'
+    'Mathematics': 3,
+    'English': 4, 'Hindi': 5, 'Urdu': 6, 'Arabic': 7, 'Sanskrit': 8,
+    'Kerala Padavali': 9, 'Adisthana Padavali': 10,
+    'Physical Education': 11, 'Art Education': 12, 'Work Education': 13
   };
 
   classes.forEach((classNum) => {
     mediums.forEach((medium) => {
       // 1. Filter books for this section
-      const sectionBooks = books.filter(
-        (b) => b.class_number === classNum && b.medium === medium
-      );
+      const sectionBooks = books.filter((b) => {
+        if (b.class_number !== classNum) return false;
+        if (medium === 'Shared') {
+          return b.medium === 'Shared';
+        } else {
+          return b.medium === medium;
+        }
+      });
 
       if (sectionBooks.length > 0) {
         // 2. Group by subject_name to remove duplicates
         const grouped = sectionBooks.reduce((acc, current) => {
-          const key = current.subject_name;
+          const mappedName = displayMap[current.subject_name] || current.subject_name;
+          const key = mappedName;
           if (!acc[key]) {
             acc[key] = {
-              subject_name: current.subject_name,
+              subject_name: mappedName,
               class_number: current.class_number,
               medium: current.medium,
               stock_total: Number(current.stock_total || 0),
@@ -91,7 +107,9 @@ export const generateReport = (books: Book[]) => {
         doc.setFontSize(16);
         doc.setTextColor(50);
         doc.setFont('helvetica', 'bold');
-        doc.text(`Class ${classNum} - ${medium} Medium`, 14, currentY);
+        
+        const title = medium === 'Shared' ? `Class ${classNum} - Languages` : `Class ${classNum} - ${medium} Medium`;
+        doc.text(title, 14, currentY);
         currentY += 8;
 
         let sectionArrived = 0;
@@ -121,7 +139,7 @@ export const generateReport = (books: Book[]) => {
           grandTotalBalance += netBalance;
 
           return [
-            displayMap[book.subject_name] || book.subject_name,
+            book.subject_name,
             qtyArr.toString(),
             qtySold.toString(),
             remaining.toString(),

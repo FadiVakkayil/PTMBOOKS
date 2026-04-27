@@ -23,10 +23,12 @@ interface TextbookCardProps {
 export default function TextbookCard({ book, onUpdate }: TextbookCardProps) {
   const [isEditingData, setIsEditingData] = useState(false);
   const [isAddingStock, setIsAddingStock] = useState(false);
+  const [isEditingRemaining, setIsEditingRemaining] = useState(false);
   
   const [tempPrice, setTempPrice] = useState(book.price.toString());
   const [tempCost, setTempCost] = useState((book.cost_price || 0).toString());
   const [stockAmount, setStockAmount] = useState('1');
+  const [remainingAmount, setRemainingAmount] = useState(book.stock_total - book.stock_sold);
   const [loading, setLoading] = useState(false);
 
   const currentStock = book.stock_total - book.stock_sold;
@@ -89,6 +91,31 @@ export default function TextbookCard({ book, onUpdate }: TextbookCardProps) {
     }
   };
 
+  const handleAdjustRemaining = async () => {
+    const amount = parseInt(remainingAmount.toString());
+    if (isNaN(amount) || amount < 0) {
+      toast.error('Please enter a valid number');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { error } = await supabase.rpc('adjust_remaining_stock', { 
+        p_row_id: book.id, 
+        p_target_remaining: amount 
+      });
+      if (error) throw error;
+      
+      toast.success(`Remaining stock adjusted to ${amount}!`);
+      setIsEditingRemaining(false);
+      onUpdate();
+    } catch (error: any) {
+      toast.error(`Adjustment failed: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <motion.div
       whileHover={{ y: -8, boxShadow: "0 20px 40px rgba(37, 99, 235, 0.15), 0 0 20px rgba(212, 175, 55, 0.1)" }}
@@ -123,21 +150,71 @@ export default function TextbookCard({ book, onUpdate }: TextbookCardProps) {
         </div>
 
         {/* Stock Status Badge - Most Prominent */}
-        <div className={`mb-6 p-4 rounded-2xl flex flex-col items-center justify-center border transition-all ${
+        <div className={`mb-6 p-4 rounded-2xl flex flex-col items-center justify-center border transition-all relative ${
           currentStock > 20 ? 'bg-emerald-50 border-emerald-100' : 
           currentStock > 0 ? 'bg-amber-50 border-amber-100' : 
           'bg-red-50 border-red-100'
         }`}>
+          <button 
+            onClick={() => {
+              setRemainingAmount(currentStock);
+              setIsEditingRemaining(!isEditingRemaining);
+            }}
+            className="absolute top-2 right-2 p-1.5 rounded-lg bg-white/50 text-foreground/40 hover:text-primary transition-colors"
+          >
+            <Edit2 size={12} />
+          </button>
+
           <span className={`text-[10px] font-black uppercase tracking-[0.2em] mb-1 ${
              currentStock > 20 ? 'text-emerald-500' : 
              currentStock > 0 ? 'text-amber-500' : 
              'text-red-500'
           }`}>Remaining Stock</span>
-          <p className={`text-4xl font-black ${
-             currentStock > 20 ? 'text-emerald-700' : 
-             currentStock > 0 ? 'text-amber-700' : 
-             'text-red-700'
-          }`}>{currentStock}</p>
+          
+          <AnimatePresence mode="wait">
+            {isEditingRemaining ? (
+              <motion.div 
+                key="edit-rem"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                className="flex items-center gap-2"
+              >
+                <input
+                  type="number"
+                  value={remainingAmount}
+                  onChange={(e) => setRemainingAmount(parseInt(e.target.value) || 0)}
+                  className="w-20 bg-white border border-primary/10 px-2 py-1 rounded-lg text-xl font-black text-center"
+                  autoFocus
+                />
+                <button 
+                  onClick={handleAdjustRemaining}
+                  className="p-1.5 bg-primary text-white rounded-lg"
+                >
+                  <Check size={14} />
+                </button>
+                <button 
+                  onClick={() => setIsEditingRemaining(false)}
+                  className="p-1.5 bg-red-500 text-white rounded-lg"
+                >
+                  <X size={14} />
+                </button>
+              </motion.div>
+            ) : (
+              <motion.p 
+                key="view-rem"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className={`text-4xl font-black ${
+                  currentStock > 20 ? 'text-emerald-700' : 
+                  currentStock > 0 ? 'text-amber-700' : 
+                  'text-red-700'
+                }`}
+              >
+                {currentStock}
+              </motion.p>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Arrival/Distribution Summary */}

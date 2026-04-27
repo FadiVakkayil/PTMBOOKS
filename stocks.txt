@@ -1,0 +1,79 @@
+Subject	                             STD 10 (Price)    STD 9 (Price)
+Malayalam 1	                              20	        15
+Arabic	                                  24	        20
+Sanskrit	                              20	        19
+Urdu	                                      21	17
+Malayalam 2	                              15	16
+English	                                      24	22
+Hindi	                                      21	25
+Physics	                                      18	20
+Chemistry	                              20	18
+Biology	                                      21	15
+Social Science 1 (History)	              21	18
+Social Science 2 (Geography)	              25	19
+Maths	                                      29	27
+IT	                                      24	18
+Physical Education	                      19	15
+Art Education	                              25	20
+Work Education  only 2 exept (agriculture)    14	16 (no varients)
+work education (agriculture)                  13        no
+TOTAL	                                      361	320
+
+
+Sl. No.	Standard	Subject / Description				Total Quantity Received
+2	9	Malayalam (Kerala Padavali)				120
+3	9	Kerala Reader English	        			410
+4	9	Kerala Reader Hindi					410
+5	9	Physics (Mal)						170
+6	9	Social Science (2) Eng					250
+7	9	Mathematics (Eng)					250
+8	9	Physical Education - Activity Book (Eng)		150
+9	9	Art Education - Activity Book (Eng)			150
+10	9	Work Integrated Education - Activity Book (Eng)		150
+11	10	Kerala Padavali Malayalam				130
+12	10	Kerala Reader English					430
+13	10	Kerala Reader Hindi					430
+14	10	Kerala Reader Arabic (Academic)				240
+15	10	Kerala Reader Urdu					15
+16	10	Physics (Mal)						180
+17	10	Chemistry (M)						180
+18	10	Chemistry (E)						260
+19	10	Biology (Mal)						180
+20	10	Social Science (2) (E)					260
+21	10	Mathematics (M)						180
+22	10	Mathematics (E)						260
+23	10	Physical Education Activity Book (M)			100
+24	10	Art Education - Activity Book (Mal)			100
+25	10	Work Education (M) Activity - Agriculture		20
+
+Standard	Subject Description					Arrived Stock (Quantity)
+9	Malayalam (Adisthana Padavali)					410
+9	Kerala Reader Arabic (Academic)					210
+9	Kerala Reader Sanskrit (Aca & San Schs)- I			50
+9	Physics (Eng)							250
+9	Chemistry (Mal)							170
+9	Chemistry (Eng)							250
+9	Biology (Mal)							170
+9	Biology (Eng)							250
+9	Social Science (1) Mal						170
+9	Social Science (1) Eng						250
+9	Social Science (2) Mal						170
+9	Mathematics (Mal)						170
+10	Adisthana Padavali Malayalam					430
+10	Kerala Reader Sanskrit (For Aca & San Schs)			30
+10	Physics (Eng)							260
+10	Social Science (1) (M)						180
+10	Social Science (1) (E)						260
+10	Social Science (2) (M)						180
+10	I.C.T. (M)							180
+10	I.C.T. (E)							260
+10	Work education clothing(M)					20
+10	Work education Printing(M)					20
+
+
+
+Std	Description							Quantity Received
+9	Kerala Reader Urdu						40
+9	I.C.T. Mal							170
+9	I.C.T. Eng							250
+10	Biology (Eng)							260

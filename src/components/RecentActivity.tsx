@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/lib/supabase';
-import { X, RotateCcw, Clock, ArrowRight, Package, TrendingUp, IndianRupee, Loader2, Trash2 } from 'lucide-react';
+import { X, RotateCcw, Clock, ArrowRight, Package, TrendingUp, IndianRupee, Loader2, Trash2, Edit2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface ActivityLog {
@@ -99,6 +99,13 @@ export default function RecentActivity({ isOpen, onClose, onActionUndone }: { is
           color: 'text-blue-500',
           bg: 'bg-blue-50/50',
           text: `Changed price from ₹${log.old_value} to ₹${log.new_value}`
+        };
+      case 'STOCK_ADJUSTMENT':
+        return {
+          icon: Edit2,
+          color: 'text-amber-500',
+          bg: 'bg-amber-50/50',
+          text: `Manually adjusted remaining stock to ${log.amount}`
         };
       default:
         return {

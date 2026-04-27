@@ -1,0 +1,51 @@
+Std,Subject,Quantity,Medium/Variant,Unit Price,Total Amount
+10,Adisthana Padavali (Mal 1),430,Mal,20,8600
+10,Arabic,240,Arabic,24,5760
+10,Art Education,100,Mal,25,2500
+10,Biology,260,Eng,21,5460
+10,Biology,180,Mal,21,3780
+10,Chemistry,260,Eng,20,5200
+10,Chemistry,180,Mal,20,3600
+10,English,430,Eng,24,10320
+10,Hindi,430,Hindi,21,9030
+10,I.C.T.,260,Eng,24,6240
+10,I.C.T.,180,Mal,24,4320
+10,Kerala Padavali (Mal 2),130,Mal,15,1950
+10,Mathematics,260,Eng,29,7540
+10,Mathematics,180,Mal,29,5220
+10,Physical Education,100,Mal,19,1900
+10,Physics,260,Eng,18,4680
+10,Physics,180,Mal,18,3240
+10,Sanskrit,30,Sanskrit,20,600
+10,Social Science 1,260,Eng,21,5460
+10,Social Science 1,180,Mal,21,3780
+10,Social Science 2,260,Eng,25,6500
+10,Social Science 2,180,Mal,25,4500
+10,Urdu,15,Urdu,21,315
+10,Work Education (Agriculture),20,Mal,13,260
+10,Work Education (Others),20,Clothing-Mal,14,280
+10,Work Education (Others),20,Printing-Mal,14,280
+9,Adisthana Padavali (Mal 1),410,Mal,15,6150
+9,Arabic,210,Arabic,20,4200
+9,Art Education,150,Eng,20,3000
+9,Biology,250,Eng,15,3750
+9,Biology,170,Mal,15,2550
+9,Chemistry,250,Eng,18,4500
+9,Chemistry,170,Mal,18,3060
+9,English,410,Eng,22,9020
+9,Hindi,410,Hindi,25,10250
+9,I.C.T.,250,Eng,18,4500
+9,I.C.T.,170,Mal,18,3060
+9,Kerala Padavali (Mal 2),120,Mal,16,1920
+9,Mathematics,250,Eng,27,6750
+9,Mathematics,170,Mal,27,4590
+9,Physical Education,150,Eng,15,2250
+9,Physics,250,Eng,20,5000
+9,Physics,170,Mal,20,3400
+9,Sanskrit,50,Sanskrit,19,950
+9,Social Science 1,250,Eng,18,4500
+9,Social Science 1,170,Mal,18,3060
+9,Social Science 2,250,Eng,19,4750
+9,Social Science 2,170,Mal,19,3230
+9,Urdu,40,Urdu,17,680
+9,Work Education (Others),150,Eng,16,2400
